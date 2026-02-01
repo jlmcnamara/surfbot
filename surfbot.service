@@ -1,0 +1,15 @@
+[Unit]
+Description=SurfBot Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=opc
+WorkingDirectory=/home/opc/surfbot
+EnvironmentFile=/home/opc/surfbot/.env
+ExecStart=/home/opc/surfbot/venv/bin/python surfbot.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
