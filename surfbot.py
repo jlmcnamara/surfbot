@@ -134,6 +134,26 @@ BEACH_LOCATIONS = {
 # California coast regions for road trips
 COAST_REGIONS = ["San-Diego", "Los-Angeles", "Santa-Barbara", "Central-Coast", "San-Francisco"]
 
+# NOAA Tide Stations for SoCal
+# https://tidesandcurrents.noaa.gov/
+NOAA_STATIONS = {
+    "santa_monica": "9410840",
+    "los_angeles": "9410660",
+    "long_beach": "9410670",
+}
+
+# Map beaches to their nearest NOAA station
+BEACH_TIDE_STATIONS = {
+    "pedro": "los_angeles",      # San Pedro - LA Harbor
+    "paradise": "santa_monica",  # Paradise Cove - Santa Monica
+    "belmont": "long_beach",     # Belmont Shore - Long Beach
+    "piedra": "santa_monica",    # La Piedra - Malibu
+    "oxnard": "santa_monica",    # Oxnard - use SM as closest
+    "carp": "santa_monica",      # Carpinteria - use SM as closest
+    "east": "santa_monica",      # East Beach SB - use SM as closest
+    "fletcher": "los_angeles",   # Fletcher Cove - use LA as closest
+}
+
 DAILY_HOUR = 6
 TICKER_START = 6
 TICKER_END = 18
@@ -300,6 +320,78 @@ def wind_direction_text(degrees):
     dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
     idx = round(degrees / 45) % 8
     return dirs[idx]
+
+# ============== NOAA TIDES API ==============
+
+def fetch_tides(station_key):
+    """
+    Fetch today's tide predictions from NOAA CO-OPS API.
+    Returns list of dicts: [{time: "HH:MM AM/PM", height_ft: X.X, type: "High"/"Low"}, ...]
+    """
+    if station_key not in NOAA_STATIONS:
+        return None
+
+    station_id = NOAA_STATIONS[station_key]
+    today = datetime.now(TZ).strftime("%Y%m%d")
+
+    url = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
+    params = {
+        "station": station_id,
+        "product": "predictions",
+        "datum": "MLLW",
+        "time_zone": "lst_ldt",
+        "units": "english",
+        "format": "json",
+        "begin_date": today,
+        "end_date": today,
+        "interval": "hilo",  # High/Low only
+    }
+
+    try:
+        r = requests.get(url, params=params, timeout=10)
+        data = r.json()
+
+        if "predictions" not in data:
+            print(f"NOAA API error: {data.get('error', 'Unknown error')}")
+            return None
+
+        tides = []
+        for pred in data["predictions"]:
+            # Parse time (format: "YYYY-MM-DD HH:MM")
+            time_str = pred.get("t", "")
+            height = float(pred.get("v", 0))
+            tide_type = "High" if pred.get("type") == "H" else "Low"
+
+            # Convert to 12-hour format
+            try:
+                dt = datetime.strptime(time_str, "%Y-%m-%d %H:%M")
+                time_fmt = dt.strftime("%I:%M %p").lstrip("0")
+            except:
+                time_fmt = time_str
+
+            tides.append({
+                "time": time_fmt,
+                "height_ft": round(height, 1),
+                "type": tide_type
+            })
+
+        return tides
+    except Exception as e:
+        print(f"NOAA tide fetch error: {e}")
+        return None
+
+
+def format_tides(tides):
+    """Format tide data for display"""
+    if not tides:
+        return "Check local tide tables"
+
+    lines = []
+    for t in tides:
+        emoji = "⬆️" if t["type"] == "High" else "⬇️"
+        lines.append(f"{emoji} {t['type']} {t['time']} ({t['height_ft']}ft)")
+
+    return "\n".join(lines)
 
 # ============== SCRAPING ==============
 
@@ -865,8 +957,19 @@ Or /local for SoCal overview"""
     else:
         wind_info = f"🌬 {wind_speed:.0f} km/h {wind_dir}" if wind_speed else "🌬 Light breeze"
 
-        msg += f"""<b>Tides</b>
-🌊 Check local tide tables
+        # Fetch NOAA tide data for this beach
+        tide_station = BEACH_TIDE_STATIONS.get(loc_code)
+        if tide_station:
+            tides = fetch_tides(tide_station)
+            tide_display = format_tides(tides)
+            station_name = tide_station.replace("_", " ").title()
+            tide_header = f"<b>Tides</b> <i>({station_name} station)</i>"
+        else:
+            tide_display = "Check local tide tables"
+            tide_header = "<b>Tides</b>"
+
+        msg += f"""{tide_header}
+{tide_display}
 
 <b>Temps</b>
 💧 Water: {water_temp} - {suit}
