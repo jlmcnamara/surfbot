@@ -13,6 +13,7 @@ import threading
 import schedule
 from datetime import datetime, timedelta
 import pytz
+import json
 
 # ============== CONFIGURATION ==============
 
@@ -212,6 +213,94 @@ def get_commute_times(destinations=None):
 
     return results
 
+# ============== TEMPERATURE HELPERS ==============
+
+def c_to_f(c):
+    """Convert Celsius to Fahrenheit"""
+    return round(c * 9/5 + 32)
+
+def f_to_c(f):
+    """Convert Fahrenheit to Celsius"""
+    return round((f - 32) * 5/9)
+
+def format_temp(celsius=None, fahrenheit=None):
+    """Format temperature as 'X°C (Y°F)' - Celsius primary"""
+    if celsius is not None:
+        c = round(celsius)
+        f = c_to_f(celsius)
+    elif fahrenheit is not None:
+        f = round(fahrenheit)
+        c = f_to_c(fahrenheit)
+    else:
+        return "?"
+    return f"{c}°C ({f}°F)"
+
+# ============== WEATHER API (Open-Meteo - Free, No API Key) ==============
+
+def fetch_weather(lat, lon):
+    """
+    Fetch current weather from Open-Meteo API (free, no key required).
+    Returns dict with water_temp_c, air_temp_c, wind_speed_kmh, wind_dir
+    """
+    try:
+        # Marine API for water temp
+        marine_url = "https://marine-api.open-meteo.com/v1/marine"
+        marine_params = {
+            "latitude": lat,
+            "longitude": lon,
+            "current": "sea_surface_temperature",
+            "timezone": "auto"
+        }
+
+        # Weather API for air temp and wind
+        weather_url = "https://api.open-meteo.com/v1/forecast"
+        weather_params = {
+            "latitude": lat,
+            "longitude": lon,
+            "current": "temperature_2m,wind_speed_10m,wind_direction_10m",
+            "timezone": "auto"
+        }
+
+        result = {
+            "water_temp_c": None,
+            "air_temp_c": None,
+            "wind_speed_kmh": None,
+            "wind_dir": None
+        }
+
+        # Fetch marine data (water temp)
+        try:
+            r = requests.get(marine_url, params=marine_params, timeout=10)
+            data = r.json()
+            if "current" in data:
+                result["water_temp_c"] = data["current"].get("sea_surface_temperature")
+        except Exception as e:
+            print(f"Marine API error: {e}")
+
+        # Fetch weather data (air temp, wind)
+        try:
+            r = requests.get(weather_url, params=weather_params, timeout=10)
+            data = r.json()
+            if "current" in data:
+                result["air_temp_c"] = data["current"].get("temperature_2m")
+                result["wind_speed_kmh"] = data["current"].get("wind_speed_10m")
+                result["wind_dir"] = data["current"].get("wind_direction_10m")
+        except Exception as e:
+            print(f"Weather API error: {e}")
+
+        return result
+    except Exception as e:
+        print(f"Weather fetch error: {e}")
+        return None
+
+def wind_direction_text(degrees):
+    """Convert wind direction degrees to compass direction"""
+    if degrees is None:
+        return ""
+    dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+    idx = round(degrees / 45) % 8
+    return dirs[idx]
+
 # ============== SCRAPING ==============
 
 def meters_to_feet(m):
@@ -221,39 +310,100 @@ def meters_to_feet(m):
         return 0
 
 def fetch_spot(slug):
-    """Fetch 7-day forecast: 7 days × 3 periods (AM, PM, Night)"""
+    """Fetch 7-day forecast from surf-forecast.com"""
     url = f"https://www.surf-forecast.com/breaks/{slug}/forecasts/latest/six_day"
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; SurfBot/1.0)"}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
 
     try:
         r = requests.get(url, headers=headers, timeout=15)
         soup = BeautifulSoup(r.text, "html.parser")
 
-        data = {"ratings": [], "waves_m": [], "periods": [], "wind_states": [], "water_temp_f": None}
+        data = {"ratings": [], "waves_m": [], "periods": [], "wind_states": [], "water_temp_c": None}
 
-        for row in soup.find_all("tr"):
-            cells = row.find_all("td")
-            if len(cells) < 2:
-                continue
+        # Try new structure - look for forecast table
+        forecast_table = soup.find("table", class_="forecast-table") or soup.find("table")
 
-            label = cells[0].get_text().strip().lower()
-            values = [c.get_text().strip() for c in cells[1:22]]
+        if forecast_table:
+            rows = forecast_table.find_all("tr")
+            for row in rows:
+                # Get row header
+                header = row.find("th") or row.find("td", class_="forecast-table__header")
+                if not header:
+                    continue
 
-            if "rating" in label:
-                data["ratings"] = values
-            elif "wave height" in label or "wave (m)" in label:
-                data["waves_m"] = [re.search(r"[\d.]+", v).group() if re.search(r"[\d.]+", v) else "0" for v in values]
-            elif label.startswith("period"):
-                data["periods"] = [re.search(r"\d+", v).group() if re.search(r"\d+", v) else "0" for v in values]
-            elif "wind state" in label:
-                data["wind_states"] = values
+                label = header.get_text().strip().lower()
+                cells = row.find_all("td")
+
+                if not cells:
+                    continue
+
+                # Extract values from cells
+                values = []
+                for cell in cells[:21]:  # 7 days × 3 periods
+                    # Check for star ratings (images or data attributes)
+                    stars = cell.find_all("img", src=re.compile(r"star"))
+                    if stars:
+                        values.append(str(len(stars)))
+                        continue
+
+                    # Check for data-rating attribute
+                    rating_attr = cell.get("data-rating") or cell.get("data-value")
+                    if rating_attr:
+                        values.append(rating_attr)
+                        continue
+
+                    # Fall back to text content
+                    text = cell.get_text().strip()
+                    values.append(text)
+
+                if "rating" in label or "star" in label:
+                    data["ratings"] = values
+                elif "wave" in label and ("height" in label or "size" in label or "(m)" in label):
+                    data["waves_m"] = [re.search(r"[\d.]+", v).group() if re.search(r"[\d.]+", v) else "0" for v in values]
+                elif "period" in label:
+                    data["periods"] = [re.search(r"\d+", v).group() if re.search(r"\d+", v) else "0" for v in values]
+                elif "wind" in label and "state" in label:
+                    data["wind_states"] = values
+
+        # Alternative: Try to find rating elements by class
+        if not data["ratings"]:
+            rating_elements = soup.find_all(class_=re.compile(r"rating|star", re.I))
+            for elem in rating_elements:
+                # Look for numeric rating
+                text = elem.get_text().strip()
+                if text.isdigit() and len(text) == 1:
+                    data["ratings"].append(text)
+
+        # Alternative: Find wave data in script tags or JSON
+        if not data["waves_m"]:
+            scripts = soup.find_all("script")
+            for script in scripts:
+                if script.string and ("waveHeight" in script.string or "wave_height" in script.string):
+                    # Try to extract JSON data
+                    match = re.search(r'\[[\d.,\s]+\]', script.string)
+                    if match:
+                        try:
+                            waves = json.loads(match.group())
+                            data["waves_m"] = [str(w) for w in waves[:21]]
+                        except:
+                            pass
 
         data["waves_ft"] = [meters_to_feet(m) for m in data["waves_m"]]
 
-        temp_match = re.search(r"(\d+\.?\d*)\s*°\s*C", r.text)
-        if temp_match:
-            c = float(temp_match.group(1))
-            data["water_temp_f"] = round(c * 9/5 + 32)
+        # Water temp - try multiple patterns
+        temp_patterns = [
+            r"water[:\s]+(\d+\.?\d*)\s*°?\s*C",
+            r"(\d+\.?\d*)\s*°\s*C.*water",
+            r"sea[:\s]+(\d+\.?\d*)\s*°?\s*C",
+            r"temperature[:\s]+(\d+\.?\d*)\s*°?\s*C",
+        ]
+        for pattern in temp_patterns:
+            temp_match = re.search(pattern, r.text, re.I)
+            if temp_match:
+                data["water_temp_c"] = float(temp_match.group(1))
+                break
 
         return data
     except Exception as e:
@@ -429,11 +579,12 @@ def daily_report():
         explainer = generate_explainer(weekend_best, pto_worthy)
         msg += f"\n<i>{explainer}</i>\n"
 
-        # Water temp
-        if data.get("water_temp_f"):
-            temp = data["water_temp_f"]
-            suit = "full 4/3" if temp < 60 else "3/2" if temp < 65 else "spring" if temp < 70 else "trunks"
-            msg += f"\n🌊 Water: {temp}°F ({suit})\n"
+        # Water temp (Celsius primary)
+        if data.get("water_temp_c"):
+            temp_c = data["water_temp_c"]
+            temp_f = c_to_f(temp_c)
+            suit = "full 4/3" if temp_f < 60 else "3/2" if temp_f < 65 else "spring" if temp_f < 70 else "trunks"
+            msg += f"\n🌊 Water: {format_temp(celsius=temp_c)} ({suit})\n"
 
         msg += "\n"
 
@@ -522,15 +673,24 @@ def hourly_top10():
     else:
         msg += "<i>Forecast unavailable</i>\n"
 
-    # ===== BEACHES =====
+    # ===== BEACHES (with real temps) =====
     msg += "\n<b>🏖 BEACHES</b>\n"
-    # TODO: Real API data
     beach_picks = [
-        ("Carp", "68°F", "calm, kid-friendly"),
-        ("Belmont", "65°F", "close, light chop"),
-        ("Paradise", "66°F", "scenic, $$$ parking"),
+        ("Carp", "carp", "calm, kid-friendly"),
+        ("Belmont", "belmont", "close, easy access"),
+        ("Paradise", "paradise", "scenic, $$$ parking"),
     ]
-    for name, temp, note in beach_picks:
+    for name, code, note in beach_picks:
+        loc = BEACH_LOCATIONS.get(code, {})
+        lat, lon = loc.get("lat"), loc.get("lon")
+        if lat and lon:
+            weather = fetch_weather(lat, lon)
+            if weather and weather.get("water_temp_c"):
+                temp = format_temp(celsius=weather["water_temp_c"])
+            else:
+                temp = "?"
+        else:
+            temp = "?"
         msg += f"{name}: {temp} - {note}\n"
 
     # ===== COMMUTE TIMES =====
@@ -594,12 +754,19 @@ def local_overview():
         for code in codes:
             if code in local_spots:
                 spot = local_spots[code]
-                # TODO: Fetch real data
-                msg += f"  {spot['name'][:20]:20} 💧62°F\n"
+                lat, lon = spot.get("lat"), spot.get("lon")
+                if lat and lon:
+                    weather = fetch_weather(lat, lon)
+                    if weather and weather.get("water_temp_c"):
+                        temp = format_temp(celsius=weather["water_temp_c"])
+                    else:
+                        temp = "?"
+                else:
+                    temp = "?"
+                msg += f"  {spot['name'][:18]:18} 💧{temp}\n"
         msg += "\n"
 
-    msg += "<i>Use /beach [code] for details:\npedro, paradise, belmont, fletcher, piedra, oxnard, carp, east</i>\n"
-    msg += "\n<i>Note: Temps are placeholder. Vibe code me to add real APIs!</i>"
+    msg += "<i>Use /beach [code] for details:\npedro, paradise, belmont, fletcher, piedra, oxnard, carp, east</i>"
 
     return msg
 
@@ -631,31 +798,63 @@ Or /local for SoCal overview"""
 
     msg = f"🏖 <b>{loc['name']}</b>\n{now.strftime('%A %b %d, %I:%M %p')}\n" + "━" * 24 + "\n\n"
 
+    # Get coordinates for weather lookup
+    lat = loc.get("lat")
+    lon = loc.get("lon")
+
+    # Special coordinates for travel destinations
+    if loc_code == "spo":
+        lat, lon = 54.3167, 8.6500  # Sankt Peter-Ording
+    elif loc_code == "van":
+        lat, lon = 49.2827, -123.1207  # Vancouver
+
+    # Fetch real weather data
+    weather = fetch_weather(lat, lon) if lat and lon else None
+
+    # Format weather data
+    water_temp = format_temp(celsius=weather["water_temp_c"]) if weather and weather.get("water_temp_c") else "N/A"
+    air_temp = format_temp(celsius=weather["air_temp_c"]) if weather and weather.get("air_temp_c") else "N/A"
+    wind_speed = weather.get("wind_speed_kmh") if weather else None
+    wind_dir = wind_direction_text(weather.get("wind_dir")) if weather else ""
+
+    # Wetsuit recommendation based on water temp
+    if weather and weather.get("water_temp_c"):
+        temp_c = weather["water_temp_c"]
+        if temp_c < 14:
+            suit = "Full 4/3 wetsuit"
+        elif temp_c < 17:
+            suit = "3/2 wetsuit"
+        elif temp_c < 20:
+            suit = "Spring suit"
+        else:
+            suit = "Trunks OK"
+    else:
+        suit = ""
+
     # Travel destinations (SPO, Vancouver) - special handling
     if loc_code == "spo":
-        msg += """<b>Wind</b> (for kiting)
-🌬 15 kts SW - Good for kiting
+        wind_info = f"🌬 {wind_speed:.0f} km/h {wind_dir}" if wind_speed else "🌬 Check local conditions"
+        kite_note = " - Good for kiting!" if wind_speed and wind_speed > 20 else ""
+
+        msg += f"""<b>Wind</b> (for kiting)
+{wind_info}{kite_note}
 
 <b>Tides</b>
-🌊 Low:  06:42  (0.3m)
-🌊 High: 12:58  (3.1m)
-🌊 Low:  19:15  (0.4m)
+🌊 Check local tide tables
 
 <b>Temps</b>
-💧 Water: 54°F (12°C) - Full wetsuit
-🌡 Air: 62°F (17°C)"""
+💧 Water: {water_temp} - {suit}
+🌡 Air: {air_temp}"""
         if loc.get("note"):
             msg += f"\n\n<i>⚠️ {loc['note']}</i>"
 
     elif loc_code == "van":
-        msg += """<b>Tides</b> (English Bay)
-🌊 Low:  05:23  (0.8m)
-🌊 High: 11:45  (4.2m)
-🌊 Low:  18:02  (1.1m)
+        msg += f"""<b>Tides</b> (English Bay)
+🌊 Check local tide tables
 
 <b>Temps</b>
-💧 Water: 52°F (11°C) - Brisk!
-🌡 Air: 58°F (14°C)
+💧 Water: {water_temp} - {suit}
+🌡 Air: {air_temp}
 
 <b>Spots</b>
 • English Bay - Calm, good swimming
@@ -664,25 +863,22 @@ Or /local for SoCal overview"""
 
     # Local SoCal beaches
     else:
-        msg += """<b>Tides</b>
-🌊 Low:  05:45  (1.2ft)
-🌊 High: 12:03  (5.1ft)
-🌊 Low:  18:22  (0.8ft)
-   └─ Now: Rising, ~3ft
+        wind_info = f"🌬 {wind_speed:.0f} km/h {wind_dir}" if wind_speed else "🌬 Light breeze"
+
+        msg += f"""<b>Tides</b>
+🌊 Check local tide tables
 
 <b>Temps</b>
-💧 Water: 62°F - Refreshing
-🌡 Air: 71°F - Perfect
+💧 Water: {water_temp} - {suit}
+🌡 Air: {air_temp}
 
 <b>Conditions</b>
 🌊 Waves: 1-2ft, gentle
-🌬 Wind: 5 mph W - Light breeze
-☀️ UV: High - Bring sunscreen"""
+{wind_info}
+☀️ UV: Bring sunscreen"""
 
         if loc.get("note"):
             msg += f"\n\n<i>💡 {loc['note']}</i>"
-
-    msg += "\n\n<i>Note: Data is placeholder. Vibe code me to add real APIs!</i>"
 
     return msg
 
@@ -692,26 +888,24 @@ def coast_overview():
 
     msg = f"🚗 <b>California Coast</b>\n{now.strftime('%A %b %d')}\n" + "━" * 24 + "\n\n"
 
-    # TODO: Fetch actual data for each region
-    msg += """<b>SAN DIEGO</b>
-💧 64°F  |  3ft  |  ⭐4 La Jolla best
+    # Fetch real water temps for each region
+    coast_points = [
+        ("SAN DIEGO", 32.7157, -117.1611, "La Jolla"),
+        ("LOS ANGELES", 33.9850, -118.4695, "Malibu"),
+        ("SANTA BARBARA", 34.4208, -119.6982, "Rincon"),
+        ("CENTRAL COAST", 35.3733, -120.8500, "Morro Bay"),
+        ("SAN FRANCISCO", 37.7749, -122.4194, "Ocean Beach"),
+    ]
 
-<b>LOS ANGELES</b>
-💧 62°F  |  2ft  |  ⭐3 Malibu cleanest
+    for region, lat, lon, spot in coast_points:
+        weather = fetch_weather(lat, lon)
+        if weather and weather.get("water_temp_c"):
+            temp = format_temp(celsius=weather["water_temp_c"])
+        else:
+            temp = "?"
+        msg += f"<b>{region}</b>\n💧 {temp}  |  {spot}\n\n"
 
-<b>SANTA BARBARA</b>
-💧 60°F  |  2ft  |  ⭐2 Rincon flat
-
-<b>CENTRAL COAST</b>
-💧 56°F  |  4ft  |  ⭐5 Morro Bay firing
-
-<b>SAN FRANCISCO</b>
-💧 54°F  |  5ft  |  ⭐4 OB solid but cold
-
-<b>Road Trip Verdict:</b>
-Central Coast is the call today. Worth the drive for 4ft+ and less crowd.
-
-<i>Note: Data is placeholder. Vibe code me to add real APIs!</i>"""
+    msg += "<b>Road Trip Verdict:</b>\nCheck individual spots for current conditions."
 
     return msg
 
