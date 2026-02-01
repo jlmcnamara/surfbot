@@ -624,11 +624,12 @@ def daily_report():
 
         weekend_best, pto_worthy = find_best_windows(data, days)
 
-        # WEEKEND (detailed)
+        # WEEKEND (detailed) - always Sat then Sun
         msg += "<b>WEEKEND</b>\n"
-        for i, day in enumerate(days[:7]):
-            if day not in ["Sat", "Sun"]:
+        for day in ["Sat", "Sun"]:
+            if day not in days:
                 continue
+            i = days.index(day)
 
             for p, per_name in enumerate(["AM", "PM"]):
                 idx = i * 3 + p
@@ -727,9 +728,27 @@ def hourly_top10():
     if data and data.get("waves_ft"):
         weekend_best = {"day": None, "per": None, "rating": -1}
 
-        for i, day in enumerate(days[:7]):
-            if day not in ["Sat", "Sun"]:
+        # First pass: find the best weekend window
+        for day in ["Sat", "Sun"]:
+            if day not in days:
                 continue
+            i = days.index(day)
+            for p, per_name in enumerate(["AM", "PM"]):
+                idx = i * 3 + p
+                if idx >= len(data.get("ratings", [])):
+                    continue
+                try:
+                    r = int(data["ratings"][idx])
+                    if r > weekend_best["rating"]:
+                        weekend_best = {"day": day, "per": per_name, "rating": r}
+                except:
+                    pass
+
+        # Second pass: display in Sat→Sun order
+        for day in ["Sat", "Sun"]:
+            if day not in days:
+                continue
+            i = days.index(day)
 
             for p, per_name in enumerate(["AM", "PM"]):
                 idx = i * 3 + p
@@ -740,13 +759,6 @@ def hourly_top10():
                 period = data["periods"][idx] if idx < len(data["periods"]) else "?"
                 rating = data["ratings"][idx] if idx < len(data["ratings"]) else "?"
                 wind = wind_text(data["wind_states"][idx] if idx < len(data["wind_states"]) else "")
-
-                try:
-                    r = int(rating)
-                    if r > weekend_best["rating"]:
-                        weekend_best = {"day": day, "per": per_name, "rating": r}
-                except:
-                    pass
 
                 is_best = (day == weekend_best["day"] and per_name == weekend_best["per"])
                 is_now = (day == days[0] and
