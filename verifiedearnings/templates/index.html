@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero">
+  <h1>The earnings calendar you can actually trust.</h1>
+  <p class="lede">
+    Every date below is confirmed by the company itself — its SEC&nbsp;8-K filing or its
+    own investor-relations page. <strong>No third-party aggregators. No analyst
+    estimates. No guesses.</strong> If a company hasn't officially announced, we show
+    no date rather than a fake one.
+  </p>
+  <div class="statbar">
+    <div class="stat"><span class="num">{{ stats.verified }}</span><span class="lbl">verified dates</span></div>
+    <div class="stat"><span class="num">{{ stats.upcoming }}</span><span class="lbl">upcoming</span></div>
+    <div class="stat"><span class="num">{{ stats.pending }}</span><span class="lbl">awaiting company</span></div>
+    <div class="stat"><span class="num">{{ stats.companies }}</span><span class="lbl">companies tracked</span></div>
+  </div>
+  <p class="today">Today is {{ today }}.</p>
+</section>
+
+<section>
+  <h2 class="section-title">Verified upcoming earnings</h2>
+
+  {% if not months %}
+    <p class="empty">No upcoming verified dates right now. Check the watchlist below.</p>
+  {% endif %}
+
+  {% for month in months %}
+  <div class="month">
+    <h3 class="month-title">{{ month.name }}</h3>
+    <ul class="events">
+      {% for e in month.events %}
+      <li class="event">
+        <div class="event-date">
+          <span class="dow">{{ e.weekday[:3] }}</span>
+          <span class="dnum">{{ e._date.day }}</span>
+          <span class="mon">{{ e._date.strftime('%b') }}</span>
+        </div>
+        <div class="event-main">
+          <div class="event-row1">
+            <a class="ticker" href="{{ url_for('company', ticker=e.ticker) }}">{{ e.ticker }}</a>
+            <span class="cname">{{ e.company }}</span>
+            <span class="badge verified" title="Confirmed by the company's own source">✓ Verified</span>
+          </div>
+          <div class="event-row2">
+            <span class="pill">{{ e.fiscal_period }}</span>
+            <span class="pill ghost">{{ e.session }}</span>
+            {% if e.call_time %}<span class="pill ghost">Call {{ e.call_time }}</span>{% endif %}
+            {% if e.days_away is not none and e.days_away >= 0 %}
+              <span class="pill soft">in {{ e.days_away }} day{{ '' if e.days_away == 1 else 's' }}</span>
+            {% endif %}
+          </div>
+          <div class="event-sources">
+            {% for s in e.sources %}
+              <a class="source" href="{{ s.url }}" target="_blank" rel="noopener"
+                 title="{{ s.quote }}">🔗 {{ s.type }}</a>
+            {% endfor %}
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</section>
+
+<section class="watchlist">
+  <h2 class="section-title">Watchlist — awaiting an official date</h2>
+  <p class="muted">
+    These companies are expected to report soon, but we will <em>not</em> show a date
+    until the company publishes one. This is the difference between VerifiedEarnings
+    and the estimate-driven sites.
+  </p>
+  <ul class="pending-grid">
+    {% for e in pending %}
+    <li class="pending-card">
+      <div class="pending-head">
+        <a class="ticker" href="{{ url_for('company', ticker=e.ticker) }}">{{ e.ticker }}</a>
+        <span class="badge pending">Awaiting company</span>
+      </div>
+      <div class="cname">{{ e.company }}</div>
+      <div class="pending-period">{{ e.fiscal_period }}</div>
+      {% if e.expected_window %}<div class="pending-window">Likely window: {{ e.expected_window }}</div>{% endif %}
+      <p class="pending-note">{{ e.note }}</p>
+      {% if e.ir_url %}<a class="source" href="{{ e.ir_url }}" target="_blank" rel="noopener">🔗 Company IR page</a>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+{% endblock %}
