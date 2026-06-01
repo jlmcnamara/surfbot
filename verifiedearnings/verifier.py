@@ -212,9 +212,13 @@ def verify_against_edgar(sess, event: dict) -> VerifyResult:
         text = _strip_html(html)
         for iso, snippet in find_announced_dates(text):
             if target is None or iso == target:
+                # `iso` is the EARNINGS date stated in the announcement text.
+                # `filing['filed']` is only when the paperwork was filed - kept
+                # as provenance, never used as the earnings date.
                 return VerifyResult(
                     True, iso, snippet, filing["url"],
-                    f"Matched in company 8-K filed {filing['filed']}.")
+                    f"Earnings date {iso} stated in an 8-K the company filed "
+                    f"on {filing['filed']} (filing date != earnings date).")
         time.sleep(0.2)  # be polite to SEC
     return VerifyResult(False, None, "", "",
                         "No matching date found in the company's recent 8-K filings.")

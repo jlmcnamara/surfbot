@@ -21,15 +21,19 @@
     </div>
 
     {% if e.status == 'verified' %}
+      <p class="detail-label">Earnings date — when the company will report results</p>
       <p class="detail-date">{{ e.date_display }}{% if e.session %} · {{ e.session }}{% endif %}</p>
       <dl class="detail-grid">
         {% if e.release_time_local %}<dt>Results release</dt><dd>{{ e.release_time_local }}</dd>{% endif %}
         {% if e.call_time %}<dt>Conference call</dt><dd>{{ e.call_time }}</dd>{% endif %}
         {% if e.exchange %}<dt>Exchange</dt><dd>{{ e.exchange }}</dd>{% endif %}
+        {% if e.announced_on %}<dt>Schedule announced</dt><dd>{{ e.announced_on }} <span class="muted">(when the company published this date)</span></dd>{% endif %}
         {% if e.verified_on %}<dt>Verified on</dt><dd>{{ e.verified_on }}</dd>{% endif %}
       </dl>
 
       <h3 class="prov-title">Primary sources</h3>
+      <p class="prov-note muted">The earnings date above is taken from the announcement text below — the date the
+        company says it will report. It is <strong>not</strong> the date the document was filed or published.</p>
       {% for s in e.sources %}
       <blockquote class="provenance">
         <p class="prov-type">{{ s.type }} — {{ s.publisher }}</p>

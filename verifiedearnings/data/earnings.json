@@ -98,6 +98,7 @@
       "release_time_local": "After close",
       "call_time": "4:30 p.m. ET (2:30 p.m. MT)",
       "status": "verified",
+      "announced_on": "2026-05-27",
       "verified_on": "2026-06-01",
       "sources": [
         {
@@ -142,6 +143,7 @@
       "release_time_local": "After close",
       "call_time": "5:00 p.m. ET (2:00 p.m. PT)",
       "status": "verified",
+      "announced_on": "2026-05-28",
       "verified_on": "2026-06-01",
       "sources": [
         {
@@ -186,6 +188,7 @@
       "release_time_local": "Before open",
       "call_time": "8:30 a.m. ET",
       "status": "verified",
+      "announced_on": "2026-05-21",
       "verified_on": "2026-06-01",
       "sources": [
         {

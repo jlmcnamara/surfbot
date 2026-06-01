@@ -97,7 +97,9 @@ a:hover { text-decoration: underline; }
 .detail-card.verified { border-left: 3px solid var(--green); }
 .detail-top { display: flex; align-items: center; justify-content: space-between; }
 .detail-top h2 { margin: 0; font-size: 1.2rem; }
-.detail-date { font-size: 1.3rem; font-weight: 700; margin: 10px 0 14px; }
+.detail-label { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--green); margin: 10px 0 0; font-weight: 600; }
+.detail-date { font-size: 1.3rem; font-weight: 700; margin: 2px 0 14px; }
+.prov-note { font-size: .85rem; margin: 0 0 10px; }
 .detail-grid { display: grid; grid-template-columns: 160px 1fr; gap: 4px 14px; margin: 0 0 8px; }
 .detail-grid dt { color: var(--muted); }
 .detail-grid dd { margin: 0; }
