@@ -8,11 +8,21 @@ A lightweight, zero-token replacement for the ChatGPT blue-whale monitoring task
 - Checks Harbor Breeze's official sightings page.
 - Checks recent official Harbor Breeze and Aquarium of the Pacific Instagram posts when Instagram's public endpoint is available.
 - Checks narrowly filtered recent Google News and Bing News RSS results.
-- Posts a comment only to GitHub issue #3 when it finds a new qualifying sighting.
-- Uses fingerprints embedded in prior issue comments to prevent duplicate alerts.
+- Creates a **new assigned GitHub issue for each qualifying alert**, producing a distinct email subject such as `🐋 BLUE WHALE ALERT | Long Beach | Aug 6`.
+- Labels alert issues `blue-whale-alert` and embeds fingerprints to prevent duplicates.
 - Keeps running after an alert.
 
 GitHub's existing issue-notification emails deliver the alert to John's Gmail. No paid monitoring service, external API key, ChatGPT task slot, or model token is required.
+
+## Alert format
+
+Each alert starts with one decision:
+
+- `KEEP WATCHING` before August 4, when John is still in Germany.
+- `CHECK THE NEXT 72 HOURS` from August 4 through August 16.
+- `CHECK A FAMILY DEPARTURE` from August 17 onward.
+
+The email then shows the latest evidence, source links, and the immediate booking-check action. Routine workflow success messages are not sent as sighting alerts.
 
 ## Timing logic
 
@@ -24,8 +34,8 @@ GitHub's existing issue-notification emails deliver the alert to John's Gmail. N
 
 ```bash
 python -m pip install -r blue_whale_monitor/requirements.txt
-python -m unittest blue_whale_monitor.test_monitor
-python -m blue_whale_monitor.monitor --dry-run
+python -m unittest discover -s blue_whale_monitor -p "test_*.py"
+python -m blue_whale_monitor.alert_delivery --dry-run
 ```
 
-The live GitHub run receives `GITHUB_TOKEN` automatically and writes only to issue #3 when a new alert qualifies.
+The live GitHub run receives `GITHUB_TOKEN` automatically and creates an assigned, labeled alert issue only when a new sighting qualifies.
