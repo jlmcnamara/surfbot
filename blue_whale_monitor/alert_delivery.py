@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Deliver blue-whale sightings as distinct, decision-oriented GitHub alerts.
+"""Deliver blue-whale sightings as short, distinct GitHub email alerts.
 
-Each qualifying sighting creates a new GitHub issue whose title becomes an
-immediately recognizable email subject. The issue is created silently, then a
-single mention comment triggers one useful email. Prior alerts are scanned for
-hidden fingerprints, so the same sighting is never sent twice.
+Each qualifying sighting creates one GitHub issue. Its title becomes the email
+subject; one mention comment triggers delivery. Prior alert issues are scanned
+for hidden fingerprints so the same sighting is never sent twice.
 """
 
 from __future__ import annotations
@@ -21,7 +20,6 @@ from blue_whale_monitor.monitor import (
     EARLY_ALERT_DATE,
     FAMILY_ALERT_DATE,
     FINGERPRINT_RE,
-    HARBOR_BREEZE_URL,
     PACIFIC,
     TODAY,
     Candidate,
@@ -32,9 +30,6 @@ from blue_whale_monitor.monitor import (
 ALERT_LABEL = "blue-whale-alert"
 ALERT_LABEL_COLOR = "0e8a16"
 ALERT_OWNER = os.getenv("ALERT_OWNER", "jlmcnamara")
-AQUARIUM_WHALE_WATCH_URL = (
-    "https://www.aquariumofpacific.org/education/info/whale_watch"
-)
 
 
 def github_headers(token: str) -> dict[str, str]:
@@ -80,62 +75,39 @@ def existing_fingerprints(repo: str, token: str) -> set[str]:
 
 def alert_title(candidates: Iterable[Candidate], today: date = TODAY) -> str:
     latest = max(candidate.observed_at.astimezone(PACIFIC) for candidate in candidates)
-    prefix = "🐋 STRONG BLUE-WHALE SIGNAL" if today < EARLY_ALERT_DATE else "🐋 BLUE WHALE ALERT"
-    return f"{prefix} | Long Beach | {latest:%b %-d}"
+    return f"Blue whale near Long Beach — {latest:%b %-d}"
 
 
-def decision_block(today: date) -> tuple[str, str]:
+def recommendation(today: date) -> str:
     if today < EARLY_ALERT_DATE:
-        return (
-            "KEEP WATCHING",
-            "This cleared the stricter pre–August 4 threshold. Do not book from Germany yet; watch whether the pattern persists into your return window.",
-        )
+        return "Keep watching. You return August 4."
     if today < FAMILY_ALERT_DATE:
-        return (
-            "CHECK THE NEXT 72 HOURS",
-            "You are back in Los Angeles. Review the next few Long Beach stadium-seat departures while the sighting is still current.",
-        )
-    return (
-        "CHECK A FAMILY DEPARTURE",
-        "Corinna, Jax, and Quinn are back. Review a Harbor Breeze/Aquarium departure for the family while the sighting is current.",
-    )
+        return "Check Long Beach departures in the next 72 hours."
+    return "Check a family departure in the next 72 hours."
+
+
+def evidence_sentence(candidate: Candidate) -> str:
+    observed = candidate.observed_at.astimezone(PACIFIC)
+    detail = candidate.title.rstrip(".")
+    return f"{candidate.source} reported {detail} on {observed:%a, %b %-d at %-I:%M %p PT}."
 
 
 def build_issue_body(candidates: list[Candidate], today: date = TODAY) -> str:
-    decision, explanation = decision_block(today)
-    lines = [
-        f"# {decision}",
-        "",
-        explanation,
-        "",
-        "## Latest evidence",
-        "",
-    ]
+    ordered = sorted(candidates, key=lambda item: item.observed_at, reverse=True)
+    lines: list[str] = []
 
-    for candidate in sorted(candidates, key=lambda item: item.observed_at, reverse=True):
-        observed = candidate.observed_at.astimezone(PACIFIC)
-        lines.extend(
-            [
-                f"**{observed:%a, %b %-d at %-I:%M %p PT} — {candidate.source}**",
-                "",
-                candidate.title,
-                "",
-                f"[Open source]({candidate.source_url})",
-                f"<!-- fingerprint:{candidate.fingerprint} -->",
-                "",
-            ]
-        )
+    for candidate in ordered:
+        lines.append(evidence_sentence(candidate))
+        lines.append(f"<!-- fingerprint:{candidate.fingerprint} -->")
 
     lines.extend(
         [
-            "## Next action",
             "",
-            f"- [Check Harbor Breeze sightings]({HARBOR_BREEZE_URL})",
-            f"- [Check Aquarium/Harbor Breeze whale-watch information]({AQUARIUM_WHALE_WATCH_URL})",
+            f"Recommendation: {recommendation(today)}",
             "",
-            "**Signal rule:** this is a new qualifying sighting, not a routine system-health message. The six-hour monitor remains active after every alert.",
+            f"[View source]({ordered[0].source_url})",
             "",
-            "Wildlife sightings are never guaranteed.",
+            "Sightings are not guaranteed.",
         ]
     )
     return "\n".join(lines)
