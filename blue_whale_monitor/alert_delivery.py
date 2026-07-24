@@ -2,8 +2,8 @@
 """Deliver blue-whale sightings as distinct, decision-oriented GitHub alerts.
 
 Each qualifying sighting creates a new GitHub issue whose title becomes an
-immediately recognizable email subject. A single in-body mention notifies John
-without generating a second assignment email. Prior alerts are scanned for
+immediately recognizable email subject. The issue is created silently, then a
+single mention comment triggers one useful email. Prior alerts are scanned for
 hidden fingerprints, so the same sighting is never sent twice.
 """
 
@@ -136,8 +136,6 @@ def build_issue_body(candidates: list[Candidate], today: date = TODAY) -> str:
             "**Signal rule:** this is a new qualifying sighting, not a routine system-health message. The six-hour monitor remains active after every alert.",
             "",
             "Wildlife sightings are never guaranteed.",
-            "",
-            f"<sub>Alert owner: @{ALERT_OWNER}</sub>",
         ]
     )
     return "\n".join(lines)
@@ -186,7 +184,16 @@ def create_alert_issue(
         timeout=30,
     )
     response.raise_for_status()
-    return response.json()["html_url"]
+    issue = response.json()
+
+    notify = requests.post(
+        f"https://api.github.com/repos/{repo}/issues/{issue['number']}/comments",
+        headers=github_headers(token),
+        json={"body": f"@{ALERT_OWNER}"},
+        timeout=30,
+    )
+    notify.raise_for_status()
+    return issue["html_url"]
 
 
 def main() -> int:
