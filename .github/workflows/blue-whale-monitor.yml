@@ -54,15 +54,17 @@ jobs:
         if: github.event_name == 'pull_request'
         run: python -m blue_whale_monitor.alert_delivery --dry-run
 
-      - name: Send one-time single-email delivery test
-        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[single-email-test]')
+      - name: Send one-time mentioned alert-comment test
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[mention-comment-test]')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cat > /tmp/whale-single-email-test.md <<'EOF'
+          cat > /tmp/whale-comment-test.md <<'EOF'
+          @jlmcnamara
+
           # CHECK THE NEXT 72 HOURS
 
-          **Single-email delivery test only — this is not a live whale sighting.**
+          **Single-email comment test only — this is not a live whale sighting.**
 
           ## Latest evidence
 
@@ -73,10 +75,8 @@ jobs:
           ## Next action
 
           Check the next few Long Beach stadium-seat departures.
-
-          <sub>Alert owner: @jlmcnamara</sub>
           EOF
-          gh issue create --repo "$GITHUB_REPOSITORY" --title "🐋 BLUE WHALE ALERT | Long Beach | SINGLE-EMAIL TEST" --body-file /tmp/whale-single-email-test.md
+          gh issue comment 6 --repo "$GITHUB_REPOSITORY" --body-file /tmp/whale-comment-test.md
 
       - name: Check for new sightings and create a distinct alert
         if: github.event_name != 'pull_request'
