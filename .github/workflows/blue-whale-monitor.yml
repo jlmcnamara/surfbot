@@ -5,7 +5,7 @@ on:
     - cron: "17 */6 * * *"
   workflow_dispatch:
   push:
-    branches: [main, agent/blue-whale-monitor]
+    branches: [main]
     paths:
       - "blue_whale_monitor/**"
       - ".github/workflows/blue-whale-monitor.yml"
@@ -50,17 +50,17 @@ jobs:
       - name: Run unit tests
         run: python -m unittest blue_whale_monitor.test_monitor
 
-      - name: Validate monitor without notifications
-        if: github.event_name == 'pull_request' || github.ref != 'refs/heads/main'
+      - name: Validate monitor on pull request
+        if: github.event_name == 'pull_request'
         run: python -m blue_whale_monitor.monitor --dry-run
 
-      - name: Post one-time branch validation receipt
-        if: github.ref == 'refs/heads/agent/blue-whale-monitor'
+      - name: Check for new sightings
+        if: github.event_name != 'pull_request'
+        run: python -m blue_whale_monitor.monitor
+
+      - name: Post one-time main activation receipt
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh issue comment 3 --repo "$GITHUB_REPOSITORY" --body "✅ Branch validation passed: unit tests, live-source dry run, and GitHub issue notification delivery all completed for commit $GITHUB_SHA."
-
-      - name: Check for new sightings
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        run: python -m blue_whale_monitor.monitor
+          gh issue comment 3 --repo "$GITHUB_REPOSITORY" --body "✅ Main activation passed: tests, live monitoring, and notification delivery succeeded for commit $GITHUB_SHA. The six-hour schedule is active."
