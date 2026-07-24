@@ -1,0 +1,59 @@
+name: Long Beach blue-whale monitor
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "blue_whale_monitor/**"
+      - ".github/workflows/blue-whale-monitor.yml"
+  pull_request:
+    paths:
+      - "blue_whale_monitor/**"
+      - ".github/workflows/blue-whale-monitor.yml"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: long-beach-blue-whale-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      MONITOR_ISSUE_NUMBER: "3"
+      LOOKBACK_DAYS: "14"
+      EARLY_ALERT_DATE: "2026-08-04"
+      FAMILY_ALERT_DATE: "2026-08-17"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: blue_whale_monitor/requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check -r blue_whale_monitor/requirements.txt
+
+      - name: Run unit tests
+        run: python -m unittest blue_whale_monitor.test_monitor
+
+      - name: Validate monitor on pull request
+        if: github.event_name == 'pull_request'
+        run: python -m blue_whale_monitor.monitor --dry-run
+
+      - name: Check for new sightings
+        if: github.event_name != 'pull_request'
+        run: python -m blue_whale_monitor.monitor
