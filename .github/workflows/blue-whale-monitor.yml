@@ -28,10 +28,10 @@ jobs:
     timeout-minutes: 10
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      MONITOR_ISSUE_NUMBER: "3"
       LOOKBACK_DAYS: "14"
       EARLY_ALERT_DATE: "2026-08-04"
       FAMILY_ALERT_DATE: "2026-08-17"
+      ALERT_ASSIGNEE: "jlmcnamara"
 
     steps:
       - name: Check out repository
@@ -48,12 +48,12 @@ jobs:
         run: python -m pip install --disable-pip-version-check -r blue_whale_monitor/requirements.txt
 
       - name: Run unit tests
-        run: python -m unittest blue_whale_monitor.test_monitor
+        run: python -m unittest discover -s blue_whale_monitor -p "test_*.py"
 
-      - name: Validate monitor on pull request
+      - name: Validate alert format on pull request
         if: github.event_name == 'pull_request'
-        run: python -m blue_whale_monitor.monitor --dry-run
+        run: python -m blue_whale_monitor.alert_delivery --dry-run
 
-      - name: Check for new sightings
+      - name: Check for new sightings and create a distinct alert
         if: github.event_name != 'pull_request'
-        run: python -m blue_whale_monitor.monitor
+        run: python -m blue_whale_monitor.alert_delivery
