@@ -5,7 +5,7 @@ on:
     - cron: "17 */6 * * *"
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, agent/blue-whale-monitor]
     paths:
       - "blue_whale_monitor/**"
       - ".github/workflows/blue-whale-monitor.yml"
@@ -50,10 +50,10 @@ jobs:
       - name: Run unit tests
         run: python -m unittest blue_whale_monitor.test_monitor
 
-      - name: Validate monitor on pull request
-        if: github.event_name == 'pull_request'
+      - name: Validate monitor without notifications
+        if: github.event_name == 'pull_request' || github.ref != 'refs/heads/main'
         run: python -m blue_whale_monitor.monitor --dry-run
 
       - name: Check for new sightings
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         run: python -m blue_whale_monitor.monitor
