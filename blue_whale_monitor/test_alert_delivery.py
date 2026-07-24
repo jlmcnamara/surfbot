@@ -4,7 +4,12 @@ import unittest
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-from blue_whale_monitor.alert_delivery import alert_title, build_issue_body, decision_block
+from blue_whale_monitor.alert_delivery import (
+    alert_title,
+    build_issue_body,
+    evidence_sentence,
+    recommendation,
+)
 from blue_whale_monitor.monitor import Candidate
 
 PACIFIC = ZoneInfo("America/Los_Angeles")
@@ -23,34 +28,47 @@ def sample_candidate(observed: date, details: str = "2 Blue Whales feeding") -> 
 
 
 class AlertTitleTests(unittest.TestCase):
-    def test_pre_return_title_signals_strength(self) -> None:
-        item = sample_candidate(date(2026, 7, 24))
-        self.assertEqual(
-            alert_title([item], date(2026, 7, 24)),
-            "🐋 STRONG BLUE-WHALE SIGNAL | Long Beach | Jul 24",
-        )
-
-    def test_post_return_title_is_direct_alert(self) -> None:
+    def test_title_is_plain_and_specific(self) -> None:
         item = sample_candidate(date(2026, 8, 6))
         self.assertEqual(
             alert_title([item], date(2026, 8, 6)),
-            "🐋 BLUE WHALE ALERT | Long Beach | Aug 6",
+            "Blue whale near Long Beach — Aug 6",
         )
 
 
 class AlertBodyTests(unittest.TestCase):
-    def test_body_is_decision_oriented_and_deduplicatable(self) -> None:
+    def test_body_is_short_and_deduplicatable(self) -> None:
         item = sample_candidate(date(2026, 8, 6))
         body = build_issue_body([item], date(2026, 8, 6))
-        self.assertIn("# CHECK THE NEXT 72 HOURS", body)
-        self.assertIn("Latest evidence", body)
-        self.assertIn("Next action", body)
+        self.assertIn(
+            "Harbor Breeze official sightings reported 2 Blue Whales feeding on Thu, Aug 6 at 3:00 PM PT.",
+            body,
+        )
+        self.assertIn("Recommendation: Check Long Beach departures in the next 72 hours.", body)
+        self.assertIn("[View source]", body)
         self.assertIn("<!-- fingerprint:" + "a" * 64 + " -->", body)
+        self.assertNotIn("Latest evidence", body)
+        self.assertNotIn("Next action", body)
+        self.assertNotIn("🐋", body)
 
-    def test_family_timing_after_august_17(self) -> None:
-        decision, explanation = decision_block(date(2026, 8, 17))
-        self.assertEqual(decision, "CHECK A FAMILY DEPARTURE")
-        self.assertIn("Corinna, Jax, and Quinn", explanation)
+    def test_pre_return_recommendation(self) -> None:
+        self.assertEqual(
+            recommendation(date(2026, 7, 24)),
+            "Keep watching. You return August 4.",
+        )
+
+    def test_family_recommendation_after_august_17(self) -> None:
+        self.assertEqual(
+            recommendation(date(2026, 8, 17)),
+            "Check a family departure in the next 72 hours.",
+        )
+
+    def test_evidence_sentence_ends_once(self) -> None:
+        item = sample_candidate(date(2026, 8, 6), "Blue whale seen.")
+        self.assertEqual(
+            evidence_sentence(item),
+            "Harbor Breeze official sightings reported Blue whale seen on Thu, Aug 6 at 3:00 PM PT.",
+        )
 
 
 if __name__ == "__main__":
