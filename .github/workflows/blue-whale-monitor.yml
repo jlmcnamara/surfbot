@@ -54,6 +54,30 @@ jobs:
         if: github.event_name == 'pull_request'
         run: python -m blue_whale_monitor.alert_delivery --dry-run
 
+      - name: Send one-time single-email delivery test
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[single-email-test]')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat > /tmp/whale-single-email-test.md <<'EOF'
+          # CHECK THE NEXT 72 HOURS
+
+          **Single-email delivery test only — this is not a live whale sighting.**
+
+          ## Latest evidence
+
+          **Thu, Aug 6 at 3:00 PM PT — Harbor Breeze official sightings**
+
+          2 Blue Whales feeding in the San Pedro Channel.
+
+          ## Next action
+
+          Check the next few Long Beach stadium-seat departures.
+
+          <sub>Alert owner: @jlmcnamara</sub>
+          EOF
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "🐋 BLUE WHALE ALERT | Long Beach | SINGLE-EMAIL TEST" --body-file /tmp/whale-single-email-test.md
+
       - name: Check for new sightings and create a distinct alert
         if: github.event_name != 'pull_request'
         run: python -m blue_whale_monitor.alert_delivery
