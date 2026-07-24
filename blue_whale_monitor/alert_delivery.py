@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Deliver blue-whale sightings as distinct, decision-oriented GitHub alerts.
 
-Each qualifying sighting creates a new assigned GitHub issue whose title becomes
-an immediately recognizable email subject. Prior alerts are scanned for hidden
-fingerprints, so the same sighting is never sent twice.
+Each qualifying sighting creates a new GitHub issue whose title becomes an
+immediately recognizable email subject. A single in-body mention notifies John
+without generating a second assignment email. Prior alerts are scanned for
+hidden fingerprints, so the same sighting is never sent twice.
 """
 
 from __future__ import annotations
@@ -30,7 +31,7 @@ from blue_whale_monitor.monitor import (
 
 ALERT_LABEL = "blue-whale-alert"
 ALERT_LABEL_COLOR = "0e8a16"
-ALERT_ASSIGNEE = os.getenv("ALERT_ASSIGNEE", "jlmcnamara")
+ALERT_OWNER = os.getenv("ALERT_OWNER", "jlmcnamara")
 AQUARIUM_WHALE_WATCH_URL = (
     "https://www.aquariumofpacific.org/education/info/whale_watch"
 )
@@ -135,6 +136,8 @@ def build_issue_body(candidates: list[Candidate], today: date = TODAY) -> str:
             "**Signal rule:** this is a new qualifying sighting, not a routine system-health message. The six-hour monitor remains active after every alert.",
             "",
             "Wildlife sightings are never guaranteed.",
+            "",
+            f"<sub>Alert owner: @{ALERT_OWNER}</sub>",
         ]
     )
     return "\n".join(lines)
@@ -178,7 +181,6 @@ def create_alert_issue(
         json={
             "title": alert_title(candidates, today),
             "body": build_issue_body(candidates, today),
-            "assignees": [ALERT_ASSIGNEE],
             "labels": [ALERT_LABEL],
         },
         timeout=30,
