@@ -1,94 +1,96 @@
 # Blue-whale monitor closeout
 
 **Date:** 2026-07-24  
-**Status:** Incomplete — Gmail filters and final end-to-end validation still require receipts.
+**Status:** Not complete — every live-system receipt is confirmed except a fresh readback that the prior ChatGPT whale task remains disabled.
 
 ## Goal
 
 Replace the ChatGPT monitored task with a persistent zero-token, zero-task-slot monitor for blue-whale sightings relevant to Harbor Breeze / Aquarium of the Pacific departures from Long Beach.
 
-## Result so far
+## Confirmed outcome
 
 - GitHub Actions checks every six hours.
-- The duplicate ChatGPT task is disabled and its slot is recovered.
-- The delivery design creates one distinct GitHub issue for each new qualifying sighting.
-- The email subject is now plain: `Blue whale near Long Beach — Aug 6`.
-- The body is reduced to one evidence sentence, one recommendation, one source link, and the wildlife disclaimer.
-- Setup, test, and technical emails were moved to `cc-automated`, archived, and marked read.
-- Setup/test GitHub issues were closed.
+- The delivery design creates one distinct GitHub issue for each qualifying sighting.
+- Live alert mail is routed to `Entertainment`; technical failure mail is routed to `cc-automated`.
+- The workflow, Gmail filters, user-visible delivery, test cleanup, temporary-label cleanup, and global `task-closeout` installation all have receipts.
+- Current ChatGPT whale-task status: **No confirmation received.**
 
-## Friction and misses
+## Receipts
 
-- A one-time sighting incorrectly stopped the original monitor.
-- Visualping was treated as actionable before account access and delivery were confirmed.
-- ChatGPT task-notification metadata was mistaken for the user's app notification settings.
-- The first GitHub delivery looked like CI plumbing rather than a useful alert.
-- The existing Gmail Cleanup Apps Script capability was overlooked because the current chat connector cannot create filters.
-- A format-only code change was pushed before updating the tests, causing one avoidable failed workflow run.
-- Completion was described too early at several points without an end-to-end receipt.
+### Workflow
 
-## Durable changes
+- Commit: `b4b98ba97eeb0a9ddd0c73997ea7b4df58c2e0d3`
+- Run: `https://github.com/jlmcnamara/surfbot/actions/runs/30124484948`
+- Started: `2026-07-24T20:33:00Z`
+- Completed: `2026-07-24T20:33:12Z`
+- Conclusion: `success`
 
-- Added `task-closeout` to `jlmcnamara/skills-repo` to require receipts, system reconciliation, user-visible testing, cleanup, and a lightweight debrief for consequential work.
-- Live sightings now use distinct issues rather than a noisy persistent setup thread.
-- Alert presentation follows a deadpan newsletter pattern: specific subject, evidence, recommendation, source.
-- Existing Gmail taxonomy is preserved: live alerts go to `Entertainment`; technical monitor mail goes to `cc-automated`.
+### Gmail Apps Script
 
-## Required closeout actions
+- Existing script ID: `1Q7yLc352h1q5TII4zOqAQ9ziaMHuiTRSclO5fM_FtqycOsHyNf8yVlpd`
+- Run ID: `blue-whale-closeout-20260724T233023Z-217a9a`
+- Plan hash: `bfc9f85198e9fed8f89e804e6f7f3ef35ce8ccb1e909c41683b377dbbc65bf82`
+- Drive run folder: `https://drive.google.com/drive/folders/1u4hOKcfyTMVisUbCw1R4MFp7uDjJ2b-y`
+- Plan file: `11YfH0F9Lvr5WHoXQUj8hNlwHxwrSuuZy`
+- Audit receipt: `19hUWFXgaXB_X0BHO1CuibCrm0urfv3Fl`
+- Pre-apply backup: `1lf1vECcATI1wDJlsvhJTh6CTC7JRjGus`
+- Apply receipt: `1FIMdV681AqeaFPUSaYrBpPpj8_Gd3bM2`
+- Independent audit receipt: `1g3i7NV3FvdlW-cIy3WU-anqk3MFQSETZ`
 
-1. **Validate the workflow**
-   - Run `gh run list --repo jlmcnamara/surfbot --workflow "Long Beach blue-whale monitor" --limit 5`.
-   - Confirm the newest run after commit `b4b98ba97eeb0a9ddd0c73997ea7b4df58c2e0d3` completed successfully.
-   - If not, inspect with `gh run view <RUN_ID> --log-failed`, fix, rerun, and record the successful run URL.
+### Persistent filters
 
-2. **Create persistent Gmail filters through the already-authorized Gmail Cleanup Apps Script**
+1. Live sighting
+   - ID: `ANe1BmggY1b2eIyk3m4lYCocgjpCIM5RDl4gp0cvbj9LKw`
+   - Query: `from:notifications@github.com subject:"Blue whale near Long Beach"`
+   - Add: `Entertainment`, `IMPORTANT`
+   - Remove: `SPAM`
+   - Keep in Inbox; preserve unread state.
+2. Technical failure
+   - ID: `ANe1BmjhYITe2zsvhQFd_12Lhe9rSJWlikGxDJqNPLtPUg`
+   - Query: `from:notifications@github.com subject:"Run failed: Long Beach blue-whale monitor"`
+   - Add: `cc-automated`, `IMPORTANT`
+   - Remove: `SPAM`
+   - Keep in Inbox and preserve unread state.
 
-   Live sighting filter:
+### End-to-end delivery
 
-   ```text
-   from:notifications@github.com subject:"Blue whale near Long Beach"
-   ```
+- Successful test issue: `https://github.com/jlmcnamara/surfbot/issues/9`
+- Single bot-authored mention run: `https://github.com/jlmcnamara/surfbot/actions/runs/30134233027`
+- Gmail message ID: `19f967d4aeae484a`
+- Arrival state: `INBOX`, `IMPORTANT`, `UNREAD`, `Entertainment`
+- Cleanup state: issue closed; message moved to `cc-automated`, marked read, and archived.
+- One-shot workflow removed by commit `2741125a6214bea5194c081d1191fc08521293c6`; public readback returned HTTP 404.
+- Attempt #8 was closed with no matching Gmail message after GitHub suppressed a self-authored self-mention.
 
-   Actions:
-   - Add `Entertainment`
-   - Add `IMPORTANT`
-   - Keep in Inbox
-   - Never send to Spam
+### Temporary labels
 
-   Technical failure filter:
+- Pre-delete backup: `17_mn-1mks2X1_OLO-Ta_doEy62Q7iQL3`
+- Cleanup receipt: `1osNt8gwfyzfjyuv5wZw6DxeI-Qhj9eyx`
+- `Alerts/Whales` (`Label_47`): 0 messages, 0 threads, 0 filter references; deleted.
+- `System/Monitor Tests` (`Label_48`): 0 messages, 0 threads, 0 filter references; deleted.
+- Gmail label readback returned neither name.
 
-   ```text
-   from:notifications@github.com subject:"Run failed: Long Beach blue-whale monitor"
-   ```
+### Task-closeout installation
 
-   Actions:
-   - Add `cc-automated`
-   - Add `IMPORTANT`
-   - Keep in Inbox and unread so a silent monitor outage is visible
-   - Never send to Spam
+- Package: `dist/task-closeout.skill`
+- Package size: 2,230 bytes
+- Package SHA-256: `37EDD75F107A58D87DAA6EFD4C61DAC6039418CD40E0D4AA21E8AF42C3D6DE72`
+- Global install: `C:\Users\John\.codex\skills\task-closeout`
+- Installed/source `SKILL.md` SHA-256: `B4C5E30EFF8B69E521BC7F74ED53AEFB0305D4C26CF4987186710450514771BB`
+- Global trigger count: 1
+- Global `AGENTS.md` SHA-256: `9FE8A0E06961A7C183F60E4C0454EB24E87CFF4B200BAB77BEFD940610760B9F`
 
-   Use the Gmail Cleanup project's existing backup → dry-run → apply → audit discipline. Record the created filter IDs and final criteria/actions.
+## Lightweight debrief
 
-3. **End-to-end filter test**
-   - Create a temporary GitHub issue titled `Blue whale near Long Beach — FILTER TEST` with body `TEST ONLY — not a whale sighting`, then mention `@jlmcnamara` once.
-   - Verify the resulting Gmail message is in Inbox, important, and labeled `Entertainment`.
-   - Close the test issue.
-   - Move the test email to `cc-automated`, mark it read, and archive it.
+- **Goal:** Replace the ChatGPT whale task with a durable GitHub-to-Gmail monitor and close every operational loop.
+- **Result:** Workflow, two filters, user-visible delivery, cleanup, and skill installation are confirmed; ChatGPT task status is unconfirmed.
+- **Friction:** GitHub suppresses email for a self-authored self-mention, so the first exact test issue produced no mail.
+- **Durable change:** A guarded Apps Script closeout module now enforces backup, dry-run, plan-hash approval, apply, audit, and zero-count label deletion; `task-closeout` is globally installed and triggered.
+- **Watchpoint:** A `Run failed: Long Beach blue-whale monitor` email must remain visible in Inbox with `IMPORTANT` and `cc-automated`.
 
-4. **Remove temporary labels**
-   - Confirm `Alerts/Whales` and `System/Monitor Tests` contain zero messages and threads.
-   - Delete both labels through the Gmail Cleanup Apps Script.
+## Unresolved
 
-5. **Final receipt**
-   Record:
-   - Successful GitHub workflow run URL and timestamp
-   - Two Gmail filter IDs and exact actions
-   - Gmail message ID or screenshot from the end-to-end filter test
-   - Confirmation that the two temporary labels were deleted
-   - Confirmation that the ChatGPT whale task remains disabled
+- ChatGPT whale task remains disabled: **No confirmation received.**
+- Verification point: ChatGPT’s Tasks page for John’s account.
 
-## Watchpoints
-
-- A GitHub email titled `Run failed: Long Beach blue-whale monitor` means monitoring may have stopped and must remain visible in Inbox.
-- A genuine alert should arrive with a subject beginning `Blue whale near Long Beach —` and the `Entertainment` label.
-- No message should be generated when there is no new qualifying sighting.
+No Google Calendar update was applicable because this closeout changed no date/time.
