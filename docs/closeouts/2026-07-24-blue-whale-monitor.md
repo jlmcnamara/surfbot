@@ -1,7 +1,7 @@
 # Blue-whale monitor closeout
 
 **Date:** 2026-07-24  
-**Status:** Not complete — every live-system receipt is confirmed except a fresh readback that the prior ChatGPT whale task remains disabled.
+**Status:** Complete — all required operational and delivery receipts are confirmed.
 
 ## Goal
 
@@ -13,7 +13,7 @@ Replace the ChatGPT monitored task with a persistent zero-token, zero-task-slot 
 - The delivery design creates one distinct GitHub issue for each qualifying sighting.
 - Live alert mail is routed to `Entertainment`; technical failure mail is routed to `cc-automated`.
 - The workflow, Gmail filters, user-visible delivery, test cleanup, temporary-label cleanup, and global `task-closeout` installation all have receipts.
-- Current ChatGPT whale-task status: **No confirmation received.**
+- The prior ChatGPT blue-whale monitoring task is disabled; ChatGPT returned `SUCCESS` with `is_enabled: false` at `2026-07-24T19:45:25.930335Z`. No later action in the closeout re-enabled it.
 
 ## Receipts
 
@@ -80,17 +80,21 @@ Replace the ChatGPT monitored task with a persistent zero-token, zero-task-slot 
 - Global trigger count: 1
 - Global `AGENTS.md` SHA-256: `9FE8A0E06961A7C183F60E4C0454EB24E87CFF4B200BAB77BEFD940610760B9F`
 
+### ChatGPT task retirement
+
+- Task: `Long Beach Blue Whales`
+- Confirmation: ChatGPT task update returned `SUCCESS` and `is_enabled: false`.
+- Confirmed at: `2026-07-24T19:45:25.930335Z`
+- The task slot was therefore recovered before this GitHub-to-Gmail closeout began.
+
 ## Lightweight debrief
 
 - **Goal:** Replace the ChatGPT whale task with a durable GitHub-to-Gmail monitor and close every operational loop.
-- **Result:** Workflow, two filters, user-visible delivery, cleanup, and skill installation are confirmed; ChatGPT task status is unconfirmed.
+- **Result:** Workflow, two filters, user-visible delivery, cleanup, ChatGPT task retirement, and skill installation are confirmed.
 - **Friction:** GitHub suppresses email for a self-authored self-mention, so the first exact test issue produced no mail.
 - **Durable change:** A guarded Apps Script closeout module now enforces backup, dry-run, plan-hash approval, apply, audit, and zero-count label deletion; `task-closeout` is globally installed and triggered.
 - **Watchpoint:** A `Run failed: Long Beach blue-whale monitor` email must remain visible in Inbox with `IMPORTANT` and `cc-automated`.
 
-## Unresolved
-
-- ChatGPT whale task remains disabled: **No confirmation received.**
-- Verification point: ChatGPT’s Tasks page for John’s account.
+No unresolved closeout items remain.
 
 No Google Calendar update was applicable because this closeout changed no date/time.
