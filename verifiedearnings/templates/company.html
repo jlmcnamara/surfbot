@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ ticker }} earnings — VerifiedEarnings{% endblock %}
+{% block content %}
+
+<p class="crumb"><a href="{{ url_for('index') }}">← Calendar</a></p>
+
+<section class="company-head">
+  <h1>{{ company_name }} <span class="ticker-lg">{{ ticker }}</span></h1>
+</section>
+
+<section>
+  {% for e in events %}
+  <article class="detail-card {{ e.status }}">
+    <div class="detail-top">
+      <h2>{{ e.fiscal_period }}</h2>
+      {% if e.status == 'verified' %}
+        <span class="badge verified">✓ Verified</span>
+      {% else %}
+        <span class="badge pending">Awaiting company</span>
+      {% endif %}
+    </div>
+
+    {% if e.status == 'verified' %}
+      <p class="detail-label">Earnings date — when the company will report results</p>
+      <p class="detail-date">{{ e.date_display }}{% if e.session %} · {{ e.session }}{% endif %}</p>
+      <dl class="detail-grid">
+        {% if e.release_time_local %}<dt>Results release</dt><dd>{{ e.release_time_local }}</dd>{% endif %}
+        {% if e.call_time %}<dt>Conference call</dt><dd>{{ e.call_time }}</dd>{% endif %}
+        {% if e.exchange %}<dt>Exchange</dt><dd>{{ e.exchange }}</dd>{% endif %}
+        {% if e.announced_on %}<dt>Schedule announced</dt><dd>{{ e.announced_on }} <span class="muted">(when the company published this date)</span></dd>{% endif %}
+        {% if e.verified_on %}<dt>Verified on</dt><dd>{{ e.verified_on }}</dd>{% endif %}
+      </dl>
+
+      <h3 class="prov-title">Primary sources</h3>
+      <p class="prov-note muted">The earnings date above is taken from the announcement text below — the date the
+        company says it will report. It is <strong>not</strong> the date the document was filed or published.</p>
+      {% for s in e.sources %}
+      <blockquote class="provenance">
+        <p class="prov-type">{{ s.type }} — {{ s.publisher }}</p>
+        <p class="prov-quote">“{{ s.quote }}”</p>
+        <a class="source" href="{{ s.url }}" target="_blank" rel="noopener">🔗 View source</a>
+        <span class="muted"> · retrieved {{ s.retrieved }}</span>
+      </blockquote>
+      {% endfor %}
+    {% else %}
+      <p class="detail-date muted">No official date announced yet.</p>
+      {% if e.expected_window %}<p>Likely window: <strong>{{ e.expected_window }}</strong></p>{% endif %}
+      <p class="pending-note">{{ e.note }}</p>
+      {% if e.ir_url %}<a class="source" href="{{ e.ir_url }}" target="_blank" rel="noopener">🔗 Watch the company IR page</a>{% endif %}
+    {% endif %}
+  </article>
+  {% endfor %}
+</section>
+
+{% endblock %}

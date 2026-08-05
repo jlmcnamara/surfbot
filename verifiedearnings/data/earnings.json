@@ -1,0 +1,380 @@
+{
+  "meta": {
+    "generated": "2026-06-01",
+    "policy": "Only earnings dates published by the company itself (its investor-relations site, its SEC 8-K filing, or a press release it issued over BusinessWire / GlobeNewswire / PR Newswire) are marked VERIFIED. No third-party aggregators. No analyst estimates. No guesses. If a company has not officially announced a date, it is listed as PENDING and shown with no date.",
+    "source_types_accepted": [
+      "Company investor-relations website",
+      "SEC EDGAR Form 8-K filed by the company",
+      "Press release issued by the company over a newswire (BusinessWire / GlobeNewswire / PR Newswire)"
+    ],
+    "source_types_rejected": [
+      "Third-party earnings-calendar aggregators",
+      "Analyst / consensus estimates of an unannounced date",
+      "Brokerage 'expected report' placeholders"
+    ]
+  },
+  "events": [
+    {
+      "ticker": "ORCL",
+      "company": "Oracle Corporation",
+      "exchange": "NYSE",
+      "cik": "0001341439",
+      "fiscal_period": "Q4 FY2026",
+      "date": "2026-06-10",
+      "session": "After market close",
+      "release_time_local": "After close",
+      "call_time": "5:00 p.m. ET (4:00 p.m. CT)",
+      "status": "verified",
+      "verified_on": "2026-06-01",
+      "sources": [
+        {
+          "type": "Company investor-relations website",
+          "publisher": "Oracle Investor Relations",
+          "url": "https://investor.oracle.com/investor-news/news-details/2026/Oracle-Sets-the-Date-for-its-Fourth-Quarter-Fiscal-Year-2026-Earnings-Announcement/default.aspx",
+          "quote": "Oracle ... will release its fiscal 2026 Q4 results on Wednesday, June 10, 2026, after the close of the market. A conference call and live webcast will be held at 4:00 p.m. Central Time to discuss the financial results.",
+          "retrieved": "2026-06-01"
+        },
+        {
+          "type": "SEC EDGAR Form 8-K filed by the company",
+          "publisher": "SEC EDGAR",
+          "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001341439&type=8-K&dateb=&owner=include&count=10",
+          "quote": "Form 8-K exhibit announcing the fourth-quarter fiscal 2026 earnings date.",
+          "retrieved": "2026-06-01"
+        }
+      ]
+    },
+    {
+      "ticker": "LEN",
+      "company": "Lennar Corporation",
+      "exchange": "NYSE",
+      "cik": "0000920760",
+      "fiscal_period": "Q2 FY2026",
+      "date": "2026-06-11",
+      "session": "After market close",
+      "release_time_local": "After close",
+      "call_time": "11:00 a.m. ET on June 12, 2026",
+      "status": "verified",
+      "verified_on": "2026-06-01",
+      "sources": [
+        {
+          "type": "Company investor-relations website",
+          "publisher": "Lennar Investor Relations",
+          "url": "https://investors.lennar.com/",
+          "quote": "Lennar will release its second quarter 2026 earnings after the market closes on June 11, 2026 and host an earnings conference call on June 12, 2026 at 11:00 a.m. ET, accessible via live webcast at investors.lennar.com.",
+          "retrieved": "2026-06-01"
+        }
+      ]
+    },
+    {
+      "ticker": "ACN",
+      "company": "Accenture plc",
+      "exchange": "NYSE",
+      "cik": "0001467373",
+      "fiscal_period": "Q3 FY2026",
+      "date": "2026-06-18",
+      "session": "Before market open",
+      "release_time_local": "Before open",
+      "call_time": "8:00 a.m. ET",
+      "status": "verified",
+      "verified_on": "2026-06-01",
+      "sources": [
+        {
+          "type": "Company investor-relations website",
+          "publisher": "Accenture Investor Relations",
+          "url": "https://investor.accenture.com/",
+          "quote": "The call to discuss Accenture's third-quarter fiscal 2026 financial results is scheduled for 8:00 a.m. ET on Thursday, June 18, 2026.",
+          "retrieved": "2026-06-01"
+        }
+      ]
+    },
+    {
+      "ticker": "MU",
+      "company": "Micron Technology, Inc.",
+      "exchange": "NASDAQ",
+      "cik": "0000723125",
+      "fiscal_period": "Q3 FY2026",
+      "date": "2026-06-24",
+      "session": "After market close",
+      "release_time_local": "After close",
+      "call_time": "4:30 p.m. ET (2:30 p.m. MT)",
+      "status": "verified",
+      "announced_on": "2026-05-27",
+      "verified_on": "2026-06-01",
+      "sources": [
+        {
+          "type": "Press release issued by the company over a newswire (GlobeNewswire)",
+          "publisher": "Micron Technology (GlobeNewswire)",
+          "url": "https://www.globenewswire.com/news-release/2026/05/27/3302360/14450/en/Micron-Technology-to-Report-Fiscal-Third-Quarter-Results-on-June-24-2026.html",
+          "quote": "Micron Technology, Inc. ... will hold its fiscal third-quarter earnings conference call on Wednesday, June 24, 2026, at 2:30 p.m. Mountain time. The call will be webcast live at investors.micron.com.",
+          "retrieved": "2026-06-01"
+        }
+      ]
+    },
+    {
+      "ticker": "DRI",
+      "company": "Darden Restaurants, Inc.",
+      "exchange": "NYSE",
+      "cik": "0000940944",
+      "fiscal_period": "Q4 FY2026",
+      "date": "2026-06-25",
+      "session": "Before market open",
+      "release_time_local": "Before open",
+      "call_time": "8:30 a.m. ET",
+      "status": "verified",
+      "verified_on": "2026-06-01",
+      "sources": [
+        {
+          "type": "Company investor-relations website",
+          "publisher": "Darden Restaurants Investor Relations",
+          "url": "https://investor.darden.com/news/news-details/2026/Darden-Restaurants-to-Release-Fiscal-2026-Fourth-Quarter-and-Full-Year-Results-on-June-25-2026/default.aspx",
+          "quote": "Darden Restaurants ... will release its fiscal 2026 fourth quarter and full year financial results before the market opens on Thursday, June 25, 2026. The Company will host a conference call ... at 8:30 a.m. ET.",
+          "retrieved": "2026-06-01"
+        }
+      ]
+    },
+    {
+      "ticker": "NKE",
+      "company": "NIKE, Inc.",
+      "exchange": "NYSE",
+      "cik": "0000320187",
+      "fiscal_period": "Q4 FY2026",
+      "date": "2026-06-30",
+      "session": "After market close",
+      "release_time_local": "After close",
+      "call_time": "5:00 p.m. ET (2:00 p.m. PT)",
+      "status": "verified",
+      "announced_on": "2026-05-28",
+      "verified_on": "2026-06-01",
+      "sources": [
+        {
+          "type": "Press release issued by the company over a newswire (BusinessWire)",
+          "publisher": "NIKE, Inc. (BusinessWire)",
+          "url": "https://www.businesswire.com/news/home/20260528240663/en/NIKE-Inc.-Announces-Fourth-Quarter-Fiscal-2026-Earnings-and-Conference-Call",
+          "quote": "NIKE, Inc. ... will release its fourth quarter fiscal 2026 financial results on Tuesday, June 30, 2026, at approximately 1:15 p.m. PT ... NIKE management will host a conference call beginning at 2:00 p.m. PT ... accessed at investors.nike.com.",
+          "retrieved": "2026-06-01"
+        }
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "company": "JPMorgan Chase & Co.",
+      "exchange": "NYSE",
+      "cik": "0000019617",
+      "fiscal_period": "Q2 2026",
+      "date": "2026-07-14",
+      "session": "Before market open",
+      "release_time_local": "Approx. 6:45 a.m. ET",
+      "call_time": "8:30 a.m. ET",
+      "status": "verified",
+      "verified_on": "2026-06-01",
+      "sources": [
+        {
+          "type": "Company investor-relations website",
+          "publisher": "JPMorganChase Investor Relations",
+          "url": "https://www.jpmorganchase.com/ir/news/2025/jpmc-announces-conference-calls-to-review-first-quarter-second-quarter-third-quarter-and-fourth-quarter-2026-earnings",
+          "quote": "Second-quarter 2026 - Tuesday, July 14, 2026 at 8:30 a.m. (Eastern). ... The financial results are scheduled to be released at approximately 6:45 a.m. (Eastern) on the dates noted above.",
+          "retrieved": "2026-06-01"
+        }
+      ]
+    },
+    {
+      "ticker": "PHM",
+      "company": "PulteGroup, Inc.",
+      "exchange": "NYSE",
+      "cik": "0000822416",
+      "fiscal_period": "Q2 2026",
+      "date": "2026-07-22",
+      "session": "Before market open",
+      "release_time_local": "Before open",
+      "call_time": "8:30 a.m. ET",
+      "status": "verified",
+      "announced_on": "2026-05-21",
+      "verified_on": "2026-06-01",
+      "sources": [
+        {
+          "type": "Press release issued by the company over a newswire (BusinessWire)",
+          "publisher": "PulteGroup, Inc. (BusinessWire)",
+          "url": "https://www.businesswire.com/news/home/20260521879295/en/PulteGroups-Second-Quarter-2026-Earnings-Release-and-Webcast-Conference-Call-Scheduled-for-July-22-2026",
+          "quote": "PulteGroup, Inc. ... will release its second quarter 2026 financial results before the market opens on Wednesday, July 22, 2026, and will hold a conference call to discuss its second quarter results that same day at 8:30 a.m. (ET).",
+          "retrieved": "2026-06-01"
+        }
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "company": "JPMorgan Chase & Co.",
+      "exchange": "NYSE",
+      "cik": "0000019617",
+      "fiscal_period": "Q3 2026",
+      "date": "2026-10-13",
+      "session": "Before market open",
+      "release_time_local": "Approx. 6:45 a.m. ET",
+      "call_time": "8:30 a.m. ET",
+      "status": "verified",
+      "verified_on": "2026-06-01",
+      "sources": [
+        {
+          "type": "Company investor-relations website",
+          "publisher": "JPMorganChase Investor Relations",
+          "url": "https://www.jpmorganchase.com/ir/news/2025/jpmc-announces-conference-calls-to-review-first-quarter-second-quarter-third-quarter-and-fourth-quarter-2026-earnings",
+          "quote": "Third-quarter 2026 - Tuesday, October 13, 2026 at 8:30 a.m. (Eastern).",
+          "retrieved": "2026-06-01"
+        }
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "company": "JPMorgan Chase & Co.",
+      "exchange": "NYSE",
+      "cik": "0000019617",
+      "fiscal_period": "Q4 2026",
+      "date": "2027-01-14",
+      "session": "Before market open",
+      "release_time_local": "Approx. 6:45 a.m. ET",
+      "call_time": "8:30 a.m. ET",
+      "status": "verified",
+      "verified_on": "2026-06-01",
+      "sources": [
+        {
+          "type": "Company investor-relations website",
+          "publisher": "JPMorganChase Investor Relations",
+          "url": "https://www.jpmorganchase.com/ir/news/2025/jpmc-announces-conference-calls-to-review-first-quarter-second-quarter-third-quarter-and-fourth-quarter-2026-earnings",
+          "quote": "Fourth-quarter 2026 - Thursday, January 14, 2027 at 8:30 a.m. (Eastern).",
+          "retrieved": "2026-06-01"
+        }
+      ]
+    },
+    {
+      "ticker": "FDX",
+      "company": "FedEx Corporation",
+      "exchange": "NYSE",
+      "cik": "0001048911",
+      "fiscal_period": "Q4 FY2026",
+      "date": null,
+      "status": "pending",
+      "expected_window": "Late June 2026 (third parties cite June 23; not yet confirmed on FedEx's own site)",
+      "note": "Third-party calendars list a date, but FedEx has not yet published an official earnings-date press release or 8-K. We will publish only when FedEx posts it.",
+      "ir_url": "https://investors.fedex.com/news-and-events/events-and-presentations/"
+    },
+    {
+      "ticker": "CAG",
+      "company": "Conagra Brands, Inc.",
+      "exchange": "NYSE",
+      "cik": "0000023217",
+      "fiscal_period": "Q4 FY2026",
+      "date": null,
+      "status": "pending",
+      "expected_window": "Early-to-mid July 2026 (third parties cite July 9; awaiting company confirmation)",
+      "note": "Awaiting an official date on conagrabrands.com or an 8-K. No company-published date located as of 2026-06-01.",
+      "ir_url": "https://www.conagrabrands.com/investor-relations/financial-news/earnings-announcements"
+    },
+    {
+      "ticker": "PAYX",
+      "company": "Paychex, Inc.",
+      "exchange": "NASDAQ",
+      "cik": "0000723531",
+      "fiscal_period": "Q4 FY2026",
+      "date": null,
+      "status": "pending",
+      "expected_window": "Late June / early July 2026 (awaiting company confirmation)",
+      "note": "Awaiting an official date on the Paychex IR site or an 8-K.",
+      "ir_url": "https://investor.paychex.com/news-and-events/events"
+    },
+    {
+      "ticker": "DAL",
+      "company": "Delta Air Lines, Inc.",
+      "exchange": "NYSE",
+      "cik": "0000027904",
+      "fiscal_period": "Q2 2026 (June quarter)",
+      "date": null,
+      "status": "pending",
+      "expected_window": "Mid-July 2026 (awaiting company confirmation)",
+      "note": "Delta has not yet posted its June-quarter 2026 earnings date on news.delta.com or filed an 8-K announcing it.",
+      "ir_url": "https://ir.delta.com/news/default.aspx"
+    },
+    {
+      "ticker": "AAPL",
+      "company": "Apple Inc.",
+      "exchange": "NASDAQ",
+      "cik": "0000320193",
+      "fiscal_period": "Q3 FY2026",
+      "date": null,
+      "status": "pending",
+      "expected_window": "Late July / early August 2026 (awaiting company confirmation)",
+      "note": "Apple has not yet announced its fiscal Q3 2026 earnings date. We will publish it the moment it appears on apple.com/investor.",
+      "ir_url": "https://www.apple.com/investor/earnings-call/"
+    },
+    {
+      "ticker": "MSFT",
+      "company": "Microsoft Corporation",
+      "exchange": "NASDAQ",
+      "cik": "0000789019",
+      "fiscal_period": "Q4 FY2026",
+      "date": null,
+      "status": "pending",
+      "expected_window": "Late July 2026 (awaiting company confirmation)",
+      "note": "No official date yet on Microsoft's investor-relations site.",
+      "ir_url": "https://www.microsoft.com/en-us/investor/earnings/trended/revenue-glance.aspx"
+    },
+    {
+      "ticker": "GOOGL",
+      "company": "Alphabet Inc.",
+      "exchange": "NASDAQ",
+      "cik": "0001652044",
+      "fiscal_period": "Q2 2026",
+      "date": null,
+      "status": "pending",
+      "expected_window": "Late July 2026 (awaiting company confirmation)",
+      "note": "No official date yet on abc.xyz/investor.",
+      "ir_url": "https://abc.xyz/investor/"
+    },
+    {
+      "ticker": "AMZN",
+      "company": "Amazon.com, Inc.",
+      "exchange": "NASDAQ",
+      "cik": "0001018724",
+      "fiscal_period": "Q2 2026",
+      "date": null,
+      "status": "pending",
+      "expected_window": "Late July / early August 2026 (awaiting company confirmation)",
+      "note": "No official date yet on ir.aboutamazon.com.",
+      "ir_url": "https://ir.aboutamazon.com/news-and-events/default.aspx"
+    },
+    {
+      "ticker": "META",
+      "company": "Meta Platforms, Inc.",
+      "exchange": "NASDAQ",
+      "cik": "0001326801",
+      "fiscal_period": "Q2 2026",
+      "date": null,
+      "status": "pending",
+      "expected_window": "Late July 2026 (awaiting company confirmation)",
+      "note": "No official date yet on investor.atmeta.com.",
+      "ir_url": "https://investor.atmeta.com/investor-news/default.aspx"
+    },
+    {
+      "ticker": "NVDA",
+      "company": "NVIDIA Corporation",
+      "exchange": "NASDAQ",
+      "cik": "0001045810",
+      "fiscal_period": "Q2 FY2027",
+      "date": null,
+      "status": "pending",
+      "expected_window": "Late August 2026 (awaiting company confirmation)",
+      "note": "No official date yet on investor.nvidia.com.",
+      "ir_url": "https://investor.nvidia.com/events-and-presentations/events-and-presentations/default.aspx"
+    },
+    {
+      "ticker": "TSLA",
+      "company": "Tesla, Inc.",
+      "exchange": "NASDAQ",
+      "cik": "0001318605",
+      "fiscal_period": "Q2 2026",
+      "date": null,
+      "status": "pending",
+      "expected_window": "Late July 2026 (awaiting company confirmation)",
+      "note": "No official date yet on ir.tesla.com.",
+      "ir_url": "https://ir.tesla.com/#events-and-presentations"
+    }
+  ]
+}

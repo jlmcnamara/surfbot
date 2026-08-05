@@ -1,0 +1,51 @@
+name: Refresh & re-verify earnings data
+
+# Keeps the verified dataset honest in production. Runs the verification engine
+# against SEC EDGAR + company IR pages, then commits any changes (e.g. a date the
+# company moved, or a source that no longer matches gets flagged).
+#
+# GitHub-hosted runners have outbound internet, so the SEC/IR fetches that are
+# blocked in the dev sandbox work here.
+
+on:
+  schedule:
+    - cron: "0 11 * * 1-5"   # 11:00 UTC, weekdays
+  workflow_dispatch: {}        # allow manual runs
+
+permissions:
+  contents: write
+
+jobs:
+  reverify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: verifiedearnings
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Re-verify every dated event against SEC EDGAR + IR
+        env:
+          EDGAR_UA: "VerifiedEarnings/1.0 (github-actions; ${{ github.repository }})"
+        run: |
+          python verifier.py reverify
+          python verifier.py report
+
+      - name: Commit refreshed data (if anything changed)
+        run: |
+          if ! git diff --quiet -- data/earnings.json; then
+            git config user.name  "verified-earnings-bot"
+            git config user.email "actions@github.com"
+            git add data/earnings.json
+            git commit -m "Re-verify earnings data [skip ci]"
+            git push
+          else
+            echo "No changes — all dates still match their primary sources."
+          fi

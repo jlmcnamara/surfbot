@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Methodology — VerifiedEarnings{% endblock %}
+{% block content %}
+
+<p class="crumb"><a href="{{ url_for('index') }}">← Calendar</a></p>
+
+<section class="prose">
+  <h1>How we verify every date</h1>
+  <p class="lede">{{ meta.policy }}</p>
+
+  <h2>The rule</h2>
+  <p>
+    A date earns the <span class="badge verified">✓ Verified</span> badge only when it
+    can be matched, character-for-character, against a document the company itself
+    published. We run an automated re-verification pass that fetches the source and
+    confirms the date is still there.
+  </p>
+
+  <h2>Sources we accept</h2>
+  <ul class="checklist">
+    {% for s in meta.source_types_accepted %}<li class="yes">{{ s }}</li>{% endfor %}
+  </ul>
+
+  <h2>Sources we reject</h2>
+  <ul class="checklist">
+    {% for s in meta.source_types_rejected %}<li class="no">{{ s }}</li>{% endfor %}
+  </ul>
+
+  <h2>The verification pipeline</h2>
+  <ol class="steps">
+    <li><strong>Resolve the company.</strong> Map the ticker to its SEC CIK using the SEC's official <code>company_tickers.json</code>.</li>
+    <li><strong>Pull primary filings.</strong> Read the company's recent Form 8-K filings from the SEC's <code>data.sec.gov</code> submissions API — these are filed by the company, under penalty of law.</li>
+    <li><strong>Match the date.</strong> Scan the filing (and the company's IR/press page) for an earnings-announcement sentence and extract the date next to it.</li>
+    <li><strong>Record provenance.</strong> Store the exact quote, the source URL, and the retrieval timestamp. You can read all of it on each company page.</li>
+    <li><strong>Re-verify.</strong> <code>python verifier.py reverify</code> re-fetches every source and flags anything that no longer matches.</li>
+  </ol>
+
+  <h2>Earnings date vs. filing date</h2>
+  <p>
+    Every date we show is the <strong>earnings date</strong> — the day the company says
+    it will report results. We read it out of the announcement sentence itself
+    (e.g. <em>“…will release results on June&nbsp;30, 2026”</em>).
+  </p>
+  <p>
+    We do <strong>not</strong> use the date a document was filed or published as the
+    earnings date. An 8-K's filing timestamp, or a press release's dateline, is kept
+    only as provenance — shown separately as “schedule announced” so you can see how
+    early the company committed to the date. The two are never conflated.
+  </p>
+
+  <h2>What "pending" means</h2>
+  <p>
+    Many companies have not yet announced their next earnings date. Third-party sites
+    fill that gap with an <em>estimate</em> — a guess based on last year's pattern.
+    We don't. A pending company shows <strong>no date at all</strong> until it
+    publishes one. That is the entire point.
+  </p>
+
+  <h2>Open data</h2>
+  <p>
+    The full dataset, including every source quote, is available as JSON at
+    <a href="{{ url_for('api_earnings') }}"><code>/api/earnings</code></a>.
+  </p>
+</section>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}VerifiedEarnings{% endblock %}</title>
+  <meta name="description" content="A 100% company-verified earnings calendar. Every date is backed by the company's own SEC filing or investor-relations page. No third-party estimates.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand-check">✓</span> Verified<span class="brand-strong">Earnings</span>
+      </a>
+      <nav>
+        <a href="{{ url_for('index') }}">Calendar</a>
+        <a href="{{ url_for('methodology') }}">Methodology</a>
+        <a href="{{ url_for('api_earnings') }}">API</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p><strong>Verified<span class="brand-strong">Earnings</span></strong> — every date traced to a primary source the company published.</p>
+      <p class="muted">Informational only; not investment advice. Always confirm against the linked company source before trading.</p>
+    </div>
+  </footer>
+</body>
+</html>
